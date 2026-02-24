@@ -429,11 +429,26 @@
         }
 
         .generated-code h3 {
-            margin: 0 0 10px 0;
+            margin: 0;
             font-size: 0.9rem;
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #lang-select {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
         }
 
         .generated-code textarea {
@@ -513,10 +528,17 @@
                 <!-- Khu vực SortableJS sẽ quản lý các khối ở đây -->
             </div>
 
-            <!-- Hiển thị mã nguồn Python thực tế -->
+            <!-- Hiển thị mã nguồn thực tế -->
             <div class="generated-code" style="position: relative;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h3>Mã Nguồn Python Tương Ứng:</h3>
+                    <h3>
+                        Mã Nguồn Tương Ứng:
+                        <select id="lang-select" onchange="changeLanguage()">
+                            <option value="python">Python</option>
+                            <option value="cpp">C++</option>
+                            <option value="javascript">JavaScript</option>
+                        </select>
+                    </h3>
                     <div id="edit-code-btn" onclick="toggleEditCode()"
                         style="display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 0.85rem; font-weight: normal; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: 0.2s;">
                         <svg id="edit-code-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -529,7 +551,7 @@
                 </div>
                 <textarea id="real-code" spellcheck="false" readonly
                     style="width: 100%; height: 100px; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #a78bfa; font-family: 'VT323', monospace; font-size: 1.25rem; resize: vertical; padding: 10px; border-radius: 8px; outline: none; box-sizing: border-box; cursor: default;"
-                    placeholder="# Nhập code Python của bạn vào đây..."></textarea>
+                    placeholder="# Nhập code của bạn vào đây..."></textarea>
             </div>
         </div>
 
@@ -548,11 +570,11 @@
                     onclick="clearTerminal()">Xóa Log</button>
             </div>
             <div class="terminal" id="output">
-                <div class="terminal-line sys-msg"># Khởi động môi trường Python mô phỏng...</div>
+                <div class="terminal-line sys-msg" id="term-sys-1"># Khởi động môi trường Python mô phỏng...</div>
                 <div class="terminal-line sys-msg"># Trạng thái: Sẵn sàng nhận lệnh!</div>
                 <!-- Con trỏ nhấp nháy -->
                 <div id="cursor-line" class="terminal-line">
-                    <span class="prompt">>>> </span><span class="typewriter-cursor"></span>
+                    <span class="prompt" id="term-prompt">>>> </span><span class="typewriter-cursor"></span>
                 </div>
             </div>
         </div>
@@ -681,6 +703,33 @@
 
         let isSyncing = false;
         let isEditMode = false;
+        let currentLang = 'python';
+
+        function changeLanguage() {
+            currentLang = document.getElementById('lang-select').value;
+
+            // Cập nhật giao diện Terminal
+            const termSys1 = document.getElementById('term-sys-1');
+            const termPrompt = document.getElementById('term-prompt');
+            const terminalBody = document.querySelector('.terminal');
+
+            if (currentLang === 'python') {
+                termSys1.textContent = "# Khởi động môi trường Python mô phỏng...";
+                termPrompt.textContent = ">>> ";
+                document.styleSheets[0].addRule('.terminal::before', 'content: "PYTHON 3.10.4"');
+            } else if (currentLang === 'cpp') {
+                termSys1.textContent = "// Khởi động môi trường C++ mô phỏng (g++)...";
+                termPrompt.textContent = "$ ./a.out ";
+                document.styleSheets[0].addRule('.terminal::before', 'content: "G++ 11.4.0"');
+            } else if (currentLang === 'javascript') {
+                termSys1.textContent = "// Khởi động môi trường Node.js mô phỏng...";
+                termPrompt.textContent = "> ";
+                document.styleSheets[0].addRule('.terminal::before', 'content: "NODE.JS v18"');
+            }
+
+            // Generate lại code dựa trên cấu trúc blocks hiện có
+            updateRealCode();
+        }
 
         function toggleEditCode() {
             const textarea = document.getElementById('real-code');
@@ -715,43 +764,59 @@
             }
         }
 
-        // Cập nhật thẻ <textarea> mã Python phía dưới cùng để người dùng thấy Python thật sự trông thế nào
+        // Cập nhật thẻ <textarea> mã phía dưới cùng để người dùng thấy Code thật sự trông thế nào
         function updateRealCode() {
             if (isSyncing || isEditMode) return;
             const blocks = Array.from(editor.children);
-            let pythonCode = "";
+            let rawCode = "";
 
-            if (blocks.length === 0) {
-                document.getElementById('real-code').value = "";
-                return;
+            if (currentLang === 'cpp') {
+                rawCode += "#include <iostream>\nusing namespace std;\n\nint main() {\n";
             }
 
             blocks.forEach(block => {
                 const type = block.dataset.type;
+
                 if (type === 'print') {
-                    let printType = block.querySelector('.print-type-select').value;
+                    const printType = block.querySelector('.print-type-select').value;
                     if (printType === 'text') {
-                        let val = block.querySelector('.content-val').value;
-                        let isNum = !isNaN(val) && val.trim() !== "";
-                        pythonCode += isNum ? `print(${val})\n` : `print("${val}")\n`;
-                    } else {
-                        let a = block.querySelector('.content-a').value;
-                        let op = block.querySelector('.content-op').value;
-                        let pyOp = op === '×' ? '*' : op === '÷' ? '/' : op;
-                        let b = block.querySelector('.content-b').value;
-                        pythonCode += `print(${a} ${pyOp} ${b})\n`;
+                        const val = block.querySelector('.print-text-area .content-val').value;
+                        if (currentLang === 'python') rawCode += `print("${val}")\n`;
+                        else if (currentLang === 'cpp') rawCode += `    cout << "${val}" << endl;\n`;
+                        else if (currentLang === 'javascript') rawCode += `console.log("${val}");\n`;
+                    } else if (printType === 'math') {
+                        const a = block.querySelector('.content-a').value;
+                        const b = block.querySelector('.content-b').value;
+                        const op = block.querySelector('.content-op').value;
+                        if (currentLang === 'python') rawCode += `print(${a} ${op} ${b})\n`;
+                        else if (currentLang === 'cpp') rawCode += `    cout << ${a} ${op} ${b} << endl;\n`;
+                        else if (currentLang === 'javascript') rawCode += `console.log(${a} ${op} ${b});\n`;
                     }
                 } else if (type === 'variable') {
-                    let name = block.querySelector('.content-name').value || "var";
+                    let name = block.querySelector('.content-name').value;
                     let val = block.querySelector('.content-val').value;
                     let isNum = !isNaN(val) && val.trim() !== "";
-                    pythonCode += isNum ? `${name} = ${val}\n` : `${name} = "${val}"\n`;
+
+                    if (currentLang === 'python') {
+                        rawCode += isNum ? `${name} = ${val}\n` : `${name} = "${val}"\n`;
+                    } else if (currentLang === 'cpp') {
+                        rawCode += isNum ? `    int ${name} = ${val};\n` : `    string ${name} = "${val}";\n`;
+                    } else if (currentLang === 'javascript') {
+                        rawCode += isNum ? `let ${name} = ${val};\n` : `let ${name} = "${val}";\n`;
+                    }
                 } else if (type === 'error') {
                     const errText = block.querySelector('.error-text').textContent;
-                    pythonCode += errText + '\n';
+                    // Lỗi giữu nguyên văn bản
+                    if (currentLang === 'cpp') rawCode += `    ${errText}\n`;
+                    else rawCode += `${errText}\n`;
                 }
             });
-            document.getElementById('real-code').value = pythonCode.trim();
+
+            if (currentLang === 'cpp') {
+                rawCode += "    return 0;\n}";
+            }
+
+            document.getElementById('real-code').value = rawCode.trim();
         }
 
         function createBlockFromCode(type, details) {
@@ -861,12 +926,21 @@
 
             lines.forEach(line => {
                 line = line.trim();
-                // Bỏ qua comments và dòng trống
-                if (!line || line.startsWith('#')) return;
+                // Bỏ qua comments, dòng trống, và cú pháp base của C++
+                if (!line || line.startsWith('#') || line.startsWith('//') || line.startsWith('using namespace') || line === 'int main() {' || line === '}' || line.startsWith('return ')) return;
 
-                // Parse print
-                // Cập nhật regex để bắt cả trường hợp print("") rỗng
-                let printMatch = line.match(/^print\s*\(\s*(.*?)\s*\)$/);
+                // Chuẩn hóa một chút: Bỏ dấu chấm phẩy ở cuối của C++ và JS đi để regex dùng chung dễ hơn
+                if (line.endsWith(';')) line = line.substring(0, line.length - 1);
+
+                // --- PARSE PRINT ---
+                // Python: print( ... )
+                // JS: console.log( ... )
+                // C++: cout << ... << endl
+                let printMatch = null;
+                if (currentLang === 'python') printMatch = line.match(/^print\s*\(\s*(.*?)\s*\)$/);
+                else if (currentLang === 'javascript') printMatch = line.match(/^console\.log\s*\(\s*(.*?)\s*\)$/);
+                else if (currentLang === 'cpp') printMatch = line.match(/^cout\s*<<\s*(.*?)\s*<<\s*endl$/);
+
                 if (printMatch) {
                     let content = printMatch[1].trim();
 
@@ -894,8 +968,15 @@
                     return;
                 }
 
-                // Parse biến số
-                let varMatch = line.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.*)$/);
+                // --- PARSE BIẾN SỐ ---
+                // Python: x = 10
+                // JS: let x = 10 (hoặc const/var)
+                // C++: int x = 10 hoặc string x = "10"
+                let varMatch = null;
+                if (currentLang === 'python') varMatch = line.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.*)$/);
+                else if (currentLang === 'javascript') varMatch = line.match(/^(?:let|var|const)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.*)$/);
+                else if (currentLang === 'cpp') varMatch = line.match(/^(?:int|string|float|double)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.*)$/);
+
                 if (varMatch) {
                     let name = varMatch[1].trim();
                     let val = varMatch[2].trim();
@@ -995,7 +1076,12 @@
             const div = document.createElement('div');
             div.id = 'cursor-line';
             div.className = 'terminal-line';
-            div.innerHTML = `<span class="prompt">>>> </span><span class="typewriter-cursor"></span>`;
+
+            let promptText = ">>> ";
+            if (currentLang === 'cpp') promptText = "$ ./a.out ";
+            else if (currentLang === 'javascript') promptText = "> ";
+
+            div.innerHTML = `<span class="prompt" id="term-prompt">${promptText}</span><span class="typewriter-cursor"></span>`;
             output.appendChild(div);
             output.scrollTop = output.scrollHeight;
         }
