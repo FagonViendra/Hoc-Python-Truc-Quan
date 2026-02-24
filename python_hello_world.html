@@ -97,8 +97,25 @@
         }
 
         /* Dấu chấm bi trên thanh kéo */
-        .gutter::after {
+        .gutter.gutter-horizontal::after {
             content: '⋮';
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .gutter.gutter-vertical {
+            cursor: row-resize;
+            height: 12px;
+            width: 100% !important;
+            margin: 6px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gutter.gutter-vertical::after {
+            content: '⋯';
             color: rgba(255, 255, 255, 0.3);
             font-size: 24px;
             font-weight: bold;
@@ -371,6 +388,8 @@
             background: #0f172a;
             position: relative;
             box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.9), inset 0 0 10px rgba(74, 222, 128, 0.2);
+            border-radius: 0 0 20px 20px;
+            /* Add radius bottom */
         }
 
         .terminal::before {
@@ -467,10 +486,16 @@
         .generated-code {
             padding: 16px 24px;
             background: #110106;
-            min-height: 120px;
+            min-height: 100px;
+            /* Reduced minimum height */
             box-shadow: inset 0 8px 20px rgba(0, 0, 0, 0.8);
             border-bottom-left-radius: 18px;
+            /* Remove bottom radius because it's now in the middle */
             border-bottom-right-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            /* Allow taking up space in vertical split */
         }
 
         .generated-code h3 {
@@ -546,16 +571,28 @@
                         <path d="M12 17v4"></path>
                         <path d="M8 21h8"></path>
                     </svg>
-                    Khu Vực Trực Quan Hóa
+                    Khu Vực Tư Duy Kéo Thả
                 </div>
-                <button class="btn run-btn" onclick="runCode()">
-                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                            fill-rule="evenodd" clip-rule="evenodd"></path>
-                    </svg>
-                    COMPILE & RUN
-                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-icon" title="Cài đặt"
+                        style="padding: 6px; border-radius: 8px; background: rgba(255,255,255,0.05);">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
+                        </svg>
+                    </button>
+                    <button class="btn run-btn" onclick="runCode()">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                                fill-rule="evenodd" clip-rule="evenodd"></path>
+                        </svg>
+                        COMPILE & RUN
+                    </button>
+                </div>
             </div>
 
             <!-- Kho chứa các loại khối -->
@@ -579,31 +616,7 @@
                 <!-- Khu vực SortableJS sẽ quản lý các khối ở đây -->
             </div>
 
-            <!-- Hiển thị mã nguồn thực tế -->
-            <div class="generated-code" style="position: relative;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h3>
-                        Mã Nguồn Tương Ứng:
-                        <select id="lang-select" onchange="changeLanguage()">
-                            <option value="python">Python</option>
-                            <option value="cpp">C++</option>
-                            <option value="javascript">JavaScript</option>
-                        </select>
-                    </h3>
-                    <div id="edit-code-btn" onclick="toggleEditCode()"
-                        style="display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 0.85rem; font-weight: normal; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: 0.2s;">
-                        <svg id="edit-code-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 20h9"></path>
-                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                        </svg>
-                        <span id="edit-code-text">Chỉnh sửa</span>
-                    </div>
-                </div>
-                <textarea id="real-code" spellcheck="false" readonly
-                    style="width: 100%; height: 100px; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #a78bfa; font-family: 'VT323', monospace; font-size: 1.25rem; resize: vertical; padding: 10px; border-radius: 8px; outline: none; box-sizing: border-box; cursor: default;"
-                    placeholder="# Nhập code của bạn vào đây..."></textarea>
-            </div>
+            <!-- Hiển thị mã nguồn thực tế đã được chuyển sang Panel 2 -->
         </div>
 
         <!-- Bảng 2: Kết quả trực quan -->
@@ -617,15 +630,70 @@
                     </svg>
                     Terminal Hiển Thị Kết Quả
                 </div>
-                <button class="btn" style="background: rgba(255,255,255,0.1); padding: 5px 10px; font-size: 0.8rem;"
-                    onclick="clearTerminal()">Xóa Log</button>
+                <div style="display: flex; gap: 8px;">
+                    <!-- Nút mở to -->
+                    <button class="btn btn-icon" title="Toàn màn hình"
+                        onclick="document.documentElement.requestFullscreen();"
+                        style="padding: 6px; border-radius: 8px; background: rgba(255,255,255,0.05);">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path
+                                d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                            </path>
+                        </svg>
+                    </button>
+                    <button class="btn" style="background: rgba(255,255,255,0.1); padding: 5px 10px; font-size: 0.8rem;"
+                        onclick="clearTerminal()">Xóa Log</button>
+                </div>
             </div>
-            <div class="terminal" id="output" data-lang="PYTHON 3.10.4">
-                <div class="terminal-line sys-msg" id="term-sys-1"># Khởi động môi trường Python mô phỏng...</div>
-                <div class="terminal-line sys-msg"># Trạng thái: Sẵn sàng nhận lệnh!</div>
-                <!-- Con trỏ nhấp nháy -->
-                <div id="cursor-line" class="terminal-line">
-                    <span class="prompt" id="term-prompt">>>> </span><span class="typewriter-cursor"></span>
+
+            <div id="output-split-wrapper" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+                <!-- Khối Mã Nguồn -->
+                <div id="output-code" class="generated-code"
+                    style="border-radius: 0; background: #110106; overflow: hidden; display: flex; flex-direction: column;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3>
+                            Mã Nguồn Tương Ứng:
+                            <select id="lang-select" onchange="changeLanguage()">
+                                <option value="python">Python</option>
+                                <option value="cpp">C++</option>
+                                <option value="javascript">JavaScript</option>
+                            </select>
+                        </h3>
+                        <div id="edit-code-btn" onclick="toggleEditCode()"
+                            style="display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 0.85rem; font-weight: normal; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: 0.2s;">
+                            <svg id="edit-code-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                            </svg>
+                            <span id="edit-code-text">Chỉnh sửa</span>
+                        </div>
+                    </div>
+                    <!-- Tạo wrapper cho code và line numbers -->
+                    <div
+                        style="display: flex; flex: 1; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;">
+                        <div id="line-numbers"
+                            style="padding: 10px 5px; background: rgba(0,0,0,0.3); color: #64748b; font-family: 'VT323', monospace; font-size: 1.25rem; text-align: right; user-select: none; width: 30px; border-right: 1px solid rgba(255,255,255,0.05);">
+                            1</div>
+                        <textarea id="real-code" spellcheck="false" readonly
+                            onscroll="document.getElementById('line-numbers').scrollTop = this.scrollTop;"
+                            oninput="updateLineNumbers()"
+                            style="flex: 1; height: 100%; min-height: 80px; background: transparent; border: none; color: #a78bfa; font-family: 'VT323', monospace; font-size: 1.25rem; resize: none; padding: 10px; outline: none; box-sizing: border-box; cursor: default; white-space: pre; line-height: 1.2;"
+                            placeholder="# Nhập code của bạn vào đây..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Khối Terminal -->
+                <div id="output-term" class="terminal" data-lang="PYTHON 3.10.4"
+                    style="border-radius: 0 0 20px 20px; flex: 1; overflow-y: auto;">
+                    <div class="terminal-line sys-msg" id="term-sys-1"># Khởi động môi trường Python mô phỏng...</div>
+                    <div class="terminal-line sys-msg"># Trạng thái: Sẵn sàng nhận lệnh!</div>
+                    <!-- Con trỏ nhấp nháy -->
+                    <div id="cursor-line" class="terminal-line">
+                        <span class="prompt" id="term-prompt">>>> </span><span class="typewriter-cursor"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -649,6 +717,32 @@
             minSize: 300,
             gutterSize: 12, /* Thu lại độ dày của đường ngăn cách */
         });
+
+        // Cấu hình tính năng Split.js theo chiều dọc (Vertical Resize) cho Mã Nguồn và Terminal
+        let verticalSplitInstance = Split(['#output-code', '#output-term'], {
+            sizes: [30, 70],
+            minSize: 100,
+            direction: 'vertical',
+            gutterSize: 12,
+        });
+
+        // Cập nhật dòng số (Line numbers)
+        function updateLineNumbers() {
+            const textarea = document.getElementById('real-code');
+            const linesText = textarea.value;
+            const lines = linesText.split('\n').length;
+            let numbersContent = '';
+            for (let i = 1; i <= (lines || 1); i++) {
+                numbersContent += i + '<br>';
+            }
+            document.getElementById('line-numbers').innerHTML = numbersContent;
+        }
+
+        const bgRealCodeUpdate = updateRealCode;
+        updateRealCode = function () {
+            bgRealCodeUpdate();
+            updateLineNumbers();
+        }
 
         // 2. Cấu hình tính năng Đổi chỗ (Swap) 2 Panel lớn bằng SortableJS
         const mainContainer = document.getElementById('main-container');
