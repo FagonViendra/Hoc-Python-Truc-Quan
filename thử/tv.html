@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Test Đổi Góc Nhìn (1st / 3rd Person)</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: monospace; }
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: monospace;
+        }
+
         #info {
             position: absolute;
             top: 20px;
             left: 20px;
             color: #fff;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.7);
             padding: 15px;
             border-radius: 8px;
             border: 2px solid #555;
@@ -20,12 +27,13 @@
             line-height: 1.5;
             z-index: 10;
         }
+
         #aim {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
             font-size: 24px;
             pointer-events: none;
             display: none;
@@ -33,6 +41,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="info">
         <h3>TEST CAMERA OMNIXEL</h3>
@@ -50,24 +59,24 @@
     <script>
         let camera, scene, renderer;
         let player, playerBody, playerHead;
-        
+
         let moveForward = false;
         let moveBackward = false;
         let moveLeft = false;
         let moveRight = false;
-        
+
         // Góc quay của chuột
-        let yaw = 0;   
-        let pitch = 0; 
-        
+        let yaw = 0;
+        let pitch = 0;
+
         let isThirdPerson = false;
-        
+
         // Vị trí và hướng mục tiêu dành cho việc nội suy (lerp/slerp) chuyển cam mượt
         const targetCamPos = new THREE.Vector3();
         const targetCamQuat = new THREE.Quaternion();
 
         const clock = new THREE.Clock();
-        
+
         const thirdPersonDist = 4;
         const thirdPersonHeight = 1.5;
 
@@ -120,15 +129,15 @@
             scene.add(grid);
 
             // --- Vài khối hộp làm vật cản để dễ canh phối cảnh ---
-            for(let i=0; i<40; i++) {
+            for (let i = 0; i < 40; i++) {
                 const w = Math.random() * 2 + 1;
                 const h = Math.random() * 4 + 1;
                 const d = Math.random() * 2 + 1;
                 const box = new THREE.Mesh(
                     new THREE.BoxGeometry(w, h, d),
-                    new THREE.MeshStandardMaterial({color: Math.random() * 0xffffff})
+                    new THREE.MeshStandardMaterial({ color: Math.random() * 0xffffff })
                 );
-                box.position.set((Math.random()-0.5)*80, h/2, (Math.random()-0.5)*80);
+                box.position.set((Math.random() - 0.5) * 80, h / 2, (Math.random() - 0.5) * 80);
                 box.castShadow = true;
                 box.receiveShadow = true;
                 scene.add(box);
@@ -150,21 +159,21 @@
             const headGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
             // Mặt trước màu vàng nhạt, các mặt khác màu tóc (đen)
             const materials = [
-                new THREE.MeshStandardMaterial({color: 0x333333}), // Right
-                new THREE.MeshStandardMaterial({color: 0x333333}), // Left
-                new THREE.MeshStandardMaterial({color: 0x333333}), // Top
-                new THREE.MeshStandardMaterial({color: 0x333333}), // Bottom
-                new THREE.MeshStandardMaterial({color: 0xffe0bd}), // Khúc mặt trước (Front)
-                new THREE.MeshStandardMaterial({color: 0x333333}), // Back
+                new THREE.MeshStandardMaterial({ color: 0x333333 }), // Right
+                new THREE.MeshStandardMaterial({ color: 0x333333 }), // Left
+                new THREE.MeshStandardMaterial({ color: 0x333333 }), // Top
+                new THREE.MeshStandardMaterial({ color: 0x333333 }), // Bottom
+                new THREE.MeshStandardMaterial({ color: 0xffe0bd }), // Khúc mặt trước (Front)
+                new THREE.MeshStandardMaterial({ color: 0x333333 }), // Back
             ];
             playerHead = new THREE.Mesh(headGeo, materials);
             playerHead.position.y = 1.45; // Chiều cao đầu
             playerHead.castShadow = true;
             player.add(playerHead);
-            
+
             // Point theo dõi mắt cho camera (Góc nhìn thứ nhất)
             player.eyes = new THREE.Object3D();
-            player.eyes.position.set(0, 1.5, -0.2); 
+            player.eyes.position.set(0, 1.5, -0.2);
             player.add(player.eyes);
 
             // --- Sự kiện chuột & phím ---
@@ -182,7 +191,7 @@
             });
 
             document.addEventListener('mousemove', onMouseMove);
-            
+
             // Render ban đầu
             updateCameraTarget();
             camera.position.copy(targetCamPos);
@@ -196,15 +205,15 @@
         }
 
         function onKeyDown(e) {
-            switch(e.code) {
+            switch (e.code) {
                 case 'KeyW': moveForward = true; break;
                 case 'KeyS': moveBackward = true; break;
                 case 'KeyA': moveLeft = true; break;
                 case 'KeyD': moveRight = true; break;
-                case 'KeyV': 
-                    isThirdPerson = !isThirdPerson; 
+                case 'KeyV':
+                    isThirdPerson = !isThirdPerson;
                     const status = document.getElementById('viewStatus');
-                    if(isThirdPerson) {
+                    if (isThirdPerson) {
                         status.innerText = "Góc nhìn thứ 3 (TPS)";
                         status.style.color = "#facc15"; // Vàng
                     } else {
@@ -217,7 +226,7 @@
         }
 
         function onKeyUp(e) {
-            switch(e.code) {
+            switch (e.code) {
                 case 'KeyW': moveForward = false; break;
                 case 'KeyS': moveBackward = false; break;
                 case 'KeyA': moveLeft = false; break;
@@ -242,7 +251,11 @@
         function updateCameraTarget() {
             // Euler của camera theo chuột
             const euler = new THREE.Euler(pitch, yaw, 0, 'YXZ');
-            
+
+            // Nhân vật và Đầu luôn hướng theo chuột dù ở góc nhìn nào (khóa camera sau lưng)
+            player.rotation.y = yaw;
+            playerHead.rotation.x = pitch;
+
             if (!isThirdPerson) {
                 // Tàng hình đầu và thân khi ở FPS để không che tầm nhìn
                 playerHead.visible = false;
@@ -251,13 +264,6 @@
                 // FPS: Vị trí camera nằm ở mắt
                 player.eyes.getWorldPosition(targetCamPos);
                 targetCamQuat.setFromEuler(euler);
-                
-                // Đầu nhân vật vẫn phải xoay để khi chuyển sang TPS hoặc có bóng (shadow) sẽ khớp
-                playerHead.rotation.x = pitch;
-                
-                // Ở FPS, nhân vật luôn hướng theo chiều yaw của chuột
-                player.rotation.y = yaw;
-
             } else {
                 // Khi rời FPS, hiện lại cơ thể
                 playerHead.visible = true;
@@ -282,9 +288,6 @@
                 dummyCam.position.copy(targetCamPos);
                 dummyCam.lookAt(playerPos);
                 targetCamQuat.copy(dummyCam.quaternion);
-
-                // Đầu nhân vật vẫn gật theo pitch
-                playerHead.rotation.x = pitch; 
             }
         }
 
@@ -292,43 +295,26 @@
             requestAnimationFrame(animate);
 
             // Tốc độ thay đổi giữa frame
-            const dt = Math.min(clock.getDelta(), 0.1); 
+            const dt = Math.min(clock.getDelta(), 0.1);
 
             // Cập nhật phím di chuyển
             if (isLocked) {
                 const speed = 6.0;
-                
+
                 // Vector hướng đi mặc định (Dựa vào góc Yaw của Camera)
                 const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
                 const right = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
-                
+
                 const moveDir = new THREE.Vector3(0, 0, 0);
                 if (moveForward) moveDir.add(forward);
                 if (moveBackward) moveDir.sub(forward);
                 if (moveLeft) moveDir.sub(right);
                 if (moveRight) moveDir.add(right);
-                
+
                 if (moveDir.lengthSq() > 0) {
                     moveDir.normalize();
                     // Di chuyển nhân vật
                     player.position.add(moveDir.multiplyScalar(speed * dt));
-                    
-                    // TPS: Thân xoay mượt theo hướng đang di chuyển (chứ không xoay cứng theo chuột như FPS)
-                    if (isThirdPerson) {
-                        const targetAngle = Math.atan2(moveDir.x, moveDir.z);
-                        
-                        // Nội suy góc quay bằng slerp Quaternion cho phép quay mượt mà, không bị khựng góc -PI/PI
-                        const startQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, player.rotation.y, 0));
-                        const endQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, targetAngle, 0));
-                        
-                        startQ.slerp(endQ, 10 * dt);
-                        
-                        const euler = new THREE.Euler().setFromQuaternion(startQ);
-                        player.rotation.y = euler.y;
-                    }
-                } else if (isThirdPerson) {
-                    // Khi không di chuyển, có thể xoay nhân vật cùng hướng camera sau 1 khoảng nhỏ nếu muốn (tự chọn)
-                    // Hiện tại đang bỏ trống để nhân vật giữ nguyên dáng đứng
                 }
             }
 
@@ -346,4 +332,5 @@
         }
     </script>
 </body>
+
 </html>
