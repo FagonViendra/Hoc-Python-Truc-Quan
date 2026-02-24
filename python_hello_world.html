@@ -80,7 +80,7 @@
             display: flex;
             flex-direction: column;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.1);
-            overflow: hidden;
+            overflow: visible;
             position: relative;
             transition: transform 0.1s;
         }
@@ -89,6 +89,8 @@
             padding: 16px 24px;
             background: #4a152d;
             border-bottom: 2px solid #1a0510;
+            border-top-left-radius: 17px;
+            border-top-right-radius: 17px;
             font-weight: 600;
             display: flex;
             justify-content: space-between;
@@ -197,9 +199,9 @@
             /* Cho phép rớt dòng khi bị thu hẹp */
             gap: 10px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
-            font-family: 'VT323', monospace;
-            font-size: 1.3rem;
-            /* Tăng cỡ chữ pixel */
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            /* Khôi phục kích thước chữ hiện đại */
             cursor: grab;
             transition: transform 0.1s, box-shadow 0.1s, border-bottom-width 0.1s, margin-bottom 0.1s;
             position: relative;
@@ -255,8 +257,8 @@
             color: #e2e8f0;
             padding: 6px 10px;
             border-radius: 6px;
-            font-family: 'VT323', monospace;
-            font-size: 1.1rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
             outline: none;
             transition: all 0.2s;
             max-width: 100%;
@@ -494,7 +496,7 @@
             <div class="toolbox">
                 <div class="tooltip">
                     <button class="btn btn-print" onclick="addBlock('print')">
-                        + Khối Print (In)
+                        + Khối In (Print)
                     </button>
                     <span class="tooltiptext">Dùng để in chữ, dữ liệu hoặc kết quả phép tính ra màn hình</span>
                 </div>
