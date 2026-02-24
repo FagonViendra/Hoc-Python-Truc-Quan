@@ -15,6 +15,8 @@
         rel="stylesheet">
     <!-- Sử dụng SortableJS để Hỗ trợ Kéo thả (Drag & Drop) một cách mượt mà nhất -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <!-- Sử dụng Split.js để kéo viền chỉnh kích thước Panel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js"></script>
     <style>
         /* Khai báo các biến CSS (Màu sắc, kích thước) để dễ quản lý giao diện Dack Mode */
         :root {
@@ -63,10 +65,39 @@
 
         .container {
             display: flex;
+            flex-direction: row;
             flex: 1;
-            gap: 24px;
             padding: 24px;
             min-height: 0;
+            /* Bỏ gap đi vì Split.js sẽ chèn gutter vào giữa */
+        }
+
+        /* CSS cho thanh kẻ kéo to nhỏ (Gutter) của Split.js */
+        .gutter {
+            background-color: transparent;
+            background-repeat: no-repeat;
+            background-position: 50%;
+            cursor: col-resize;
+            margin: 0 12px;
+            /* Tạo khoảng cách giống gap cũ */
+            border-radius: 10px;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gutter:hover,
+        .gutter:active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Dấu chấm bi trên thanh kéo */
+        .gutter::after {
+            content: '⋮';
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 24px;
+            font-weight: bold;
         }
 
         .panel {
@@ -82,7 +113,7 @@
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.1);
             overflow: visible;
             position: relative;
-            transition: transform 0.1s;
+            /* Bỏ transition: transform đi để kéo to/nhỏ bằng split cho mượt */
         }
 
         .panel-header {
@@ -99,6 +130,17 @@
             color: #fff;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             z-index: 10;
+            cursor: grab;
+            /* Báo hiệu có thể lôi kéo */
+        }
+
+        .panel-header:active {
+            cursor: grabbing;
+        }
+
+        /* Khi Panel đang được kéo đi thì làm mờ phần nền cũ */
+        .panel-ghost {
+            opacity: 0.4;
         }
 
         /* Thanh công cụ chứa các nút thêm khối lệnh */
@@ -484,10 +526,10 @@
         <h1>HỌC LẬP TRÌNH TRỰC QUAN</h1>
     </header>
 
-    <div class="container">
+    <div class="container" id="main-container">
         <!-- Bảng 1: Lắp rắp khối -->
-        <div class="panel">
-            <div class="panel-header">
+        <div class="panel" id="panel-editor">
+            <div class="panel-header drag-panel-handle" title="Kéo để đổi chỗ">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -556,8 +598,8 @@
         </div>
 
         <!-- Bảng 2: Kết quả trực quan -->
-        <div class="panel">
-            <div class="panel-header">
+        <div class="panel" id="panel-output">
+            <div class="panel-header drag-panel-handle" title="Kéo để đổi chỗ">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -581,14 +623,52 @@
     </div>
 
     <script>
-        // Cấu hình tính năng Kéo Thả bằng SortableJS
+        // Cấu hình tính năng Kéo Thả bằng SortableJS cho các khối lệnh nhỏ
         const editor = document.getElementById('editor');
         new Sortable(editor, {
             animation: 250, // Animation khi kéo trượt
             ghostClass: 'sortable-ghost', // Lớp CSS khi đang kéo
-            handle: '.drag-handle', // Chỉ cho phép kéo ở icon grip
+            handle: '.code-block', // Cho phép kéo từ bất kỳ đâu trên block
             onEnd: function (evt) {
                 updateRealCode(); // Cập nhật code thật sau khi kéo thả xong
+            }
+        });
+
+        // 1. Cấu hình tính năng Split.js (Kéo to/nhỏ độ rộng) cho 2 Panel
+        let splitInstance = Split(['#panel-editor', '#panel-output'], {
+            sizes: [50, 50],
+            minSize: 300,
+            gutterSize: 24, // Bằng giá trị gap cũ
+        });
+
+        // 2. Cấu hình tính năng Đổi chỗ (Swap) 2 Panel lớn bằng SortableJS
+        const mainContainer = document.getElementById('main-container');
+        new Sortable(mainContainer, {
+            animation: 300,
+            handle: '.drag-panel-handle', // Chỉ kéo 2 bảng khi túm vào Header
+            ghostClass: 'panel-ghost',
+            direction: 'horizontal',
+            onEnd: function (evt) {
+                // Resize lại cấu hình split khi đổi chỗ Panels để không bị lỗi kích thước
+                // Lấy kích thước hiện tại ra trước
+                const currentSizes = splitInstance.getSizes();
+                // Huỷ split cũ đi
+                splitInstance.destroy();
+
+                // Lấy thứ tự html thật sự sau DOM mới
+                const currentPanels = Array.from(mainContainer.children)
+                    .filter(el => el.classList.contains('panel'))
+                    .map(el => '#' + el.id);
+
+                // Tráo 2 phần trăm width tương ứng
+                const newSizes = [currentSizes[1], currentSizes[0]];
+
+                // Khởi tạo lại Split.js theo mảng thứ tự DOM mới
+                splitInstance = Split(currentPanels, {
+                    sizes: newSizes,
+                    minSize: 300,
+                    gutterSize: 24,
+                });
             }
         });
 
