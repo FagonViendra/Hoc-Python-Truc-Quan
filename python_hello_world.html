@@ -587,18 +587,18 @@
                     // Nếu giá trị có chứa trích dẫn, hoặc để cho đơn giản ta giả định là chuỗi trừ phi nó đã là tên biến
                     // Ở đây đơn giản hóa luôn wrap bằng dấy nháy kép nếu nó không phải số
                     let isNum = !isNaN(val) && val.trim() !== "";
-                    pythonCode += isNum ?\`print(\${val})\n\` : \`print("\${val}")\n\`;
+                    pythonCode += isNum ? `print(${val})\n` : `print("${val}")\n`;
                 } else if (type === 'variable') {
                     let name = block.querySelector('.content-name').value || "var";
                     let val = block.querySelector('.content-val').value;
                     let isNum = !isNaN(val) && val.trim() !== "";
-                    pythonCode += isNum ? \`\${name} = \${val}\n\` : \`\${name} = "\${val}"\n\`;
+                    pythonCode += isNum ? `${name} = ${val}\n` : `${name} = "${val}"\n`;
                 } else if (type === 'math') {
                     let a = block.querySelector('.content-a').value;
                     let op = block.querySelector('.content-op').value;
                     let pyOp = op === '×' ? '*' : op === '÷' ? '/' : op;
                     let b = block.querySelector('.content-b').value;
-                    pythonCode += \`print(\${a} \${pyOp} \${b})\n\`;
+                    pythonCode += `print(${a} ${pyOp} ${b})\n`;
                 }
             });
 
@@ -608,11 +608,11 @@
         // Mảng lưu trữ trạng thái các dòng đang gõ (Hiệu ứng Typewriter Terminal)
         let queueLines = [];
         let isTyping = false;
-        
+
         // Trình thông dịch cực kỳ đơn giản (Mô phỏng)
         function runCode() {
             const blocks = Array.from(editor.children);
-            if(blocks.length === 0) {
+            if (blocks.length === 0) {
                 addLogTerminal("# Lỗi: Không có khối lệnh nào để thực thi.", true);
                 return;
             }
@@ -626,7 +626,7 @@
                 try {
                     if (type === 'print') {
                         let val = block.querySelector('.content-val').value;
-                        if(env.hasOwnProperty(val)) {
+                        if (env.hasOwnProperty(val)) {
                             queueLines.push(env[val]); // Nếu in biến
                         } else {
                             queueLines.push(val); // In chuỗi/số
@@ -634,32 +634,32 @@
                     } else if (type === 'variable') {
                         let name = block.querySelector('.content-name').value;
                         let val = block.querySelector('.content-val').value;
-                        
+
                         if (!name.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/)) {
-                            throw new Error(\`SyntaxError: Tên biến '\${name}' không hợp lệ. Chỉ dùng a-z, _\`);
+                            throw new Error(`SyntaxError: Tên biến '${name}' không hợp lệ. Chỉ dùng a-z, _`);
                         }
-                        
+
                         let isNum = !isNaN(val) && val.trim() !== "";
                         env[name] = isNum ? Number(val) : val;
                         // Biến không in ra kết quả, nhưng thêm log hệ thống
-                        queueLines.push(\`[Hệ thống] Đã cấu hình bộ nhớ: \${name} = \${env[name]}\`);
-                        
+                        queueLines.push(`[Hệ thống] Đã cấu hình bộ nhớ: ${name} = ${env[name]}`);
+
                     } else if (type === 'math') {
                         let a = Number(block.querySelector('.content-a').value);
                         let buildOp = block.querySelector('.content-op').value;
                         let b = Number(block.querySelector('.content-b').value);
                         let res = 0;
-                        if(buildOp === '+') res = a + b;
-                        if(buildOp === '-') res = a - b;
-                        if(buildOp === '*' || buildOp === '×') res = a * b;
-                        if(buildOp === '/' || buildOp === '÷') {
-                            if(b === 0) throw new Error("ZeroDivisionError: Lỗi chia cho 0!");
+                        if (buildOp === '+') res = a + b;
+                        if (buildOp === '-') res = a - b;
+                        if (buildOp === '*' || buildOp === '×') res = a * b;
+                        if (buildOp === '/' || buildOp === '÷') {
+                            if (b === 0) throw new Error("ZeroDivisionError: Lỗi chia cho 0!");
                             res = a / b;
                         }
                         queueLines.push(res);
                     }
                 } catch (e) {
-                    queueLines.push(\`[ERROR] \${e.message}\`);
+                    queueLines.push(`[ERROR] ${e.message}`);
                     // Dừng ngay lập tức nếu lỗi
                     break;
                 }
@@ -671,7 +671,7 @@
 
         function removeCursor() {
             const cur = document.getElementById('cursor-line');
-            if(cur) cur.remove();
+            if (cur) cur.remove();
         }
         function appendCursor() {
             removeCursor();
@@ -679,23 +679,23 @@
             const div = document.createElement('div');
             div.id = 'cursor-line';
             div.className = 'terminal-line';
-            div.innerHTML = \`<span class="prompt">>>> </span><span class="typewriter-cursor"></span>\`;
+            div.innerHTML = `<span class="prompt">>>> </span><span class="typewriter-cursor"></span>`;
             output.appendChild(div);
             output.scrollTop = output.scrollHeight;
         }
 
-        function addLogTerminal(text, isError=false) {
+        function addLogTerminal(text, isError = false) {
             removeCursor();
             const output = document.getElementById('output');
             const row = document.createElement('div');
-            row.className = \`terminal-line \${isError ? 'error-msg' : 'output-msg'}\`;
-            
+            row.className = `terminal-line ${isError ? 'error-msg' : 'output-msg'}`;
+
             // Nếu là log hệ thống (Hệ thống) thì in mờ
-            if(String(text).startsWith('[Hệ')) {
+            if (String(text).startsWith('[Hệ')) {
                 row.className = 'terminal-line sys-msg';
             }
-            
-            row.innerHTML = \`<span style="margin-right: 10px;">\${isError?'❌':''}</span> <span>\${text}</span>\`;
+
+            row.innerHTML = `<span style="margin-right: 10px;">${isError ? '❌' : ''}</span> <span>${text}</span>`;
             output.appendChild(row);
             appendCursor();
         }
@@ -704,18 +704,18 @@
         function processQueue() {
             if (isTyping || queueLines.length === 0) return;
             isTyping = true;
-            
+
             const textToType = queueLines.shift();
             const isError = String(textToType).startsWith('[ERROR]');
-            
+
             removeCursor();
             const output = document.getElementById('output');
             const row = document.createElement('div');
             const isSysMsg = String(textToType).startsWith('[Hệ');
-            
-            row.className = \`terminal-line \${isError ? 'error-msg' : (isSysMsg?'sys-msg':'output-msg')}\`;
-            let prefix = isError ? '[Ngoại lệ Pỵthon] ' : (isSysMsg?'':'<span class="prompt">>></span> ');
-            
+
+            row.className = `terminal-line ${isError ? 'error-msg' : (isSysMsg ? 'sys-msg' : 'output-msg')}`;
+            let prefix = isError ? '[Ngoại lệ Pỵthon] ' : (isSysMsg ? '' : '<span class="prompt">>></span> ');
+
             let textSpan = document.createElement('span');
             row.innerHTML = prefix;
             row.appendChild(textSpan);
@@ -723,14 +723,14 @@
 
             let charIdx = 0;
             let actualStr = String(textToType).replace('[ERROR] ', '');
-            
+
             // Set Interval đánh từng phím nhanh (40ms/phím)
             let typeInterval = setInterval(() => {
                 textSpan.textContent += actualStr.charAt(charIdx);
                 charIdx++;
                 output.scrollTop = output.scrollHeight; // Auto cuộn
-                
-                if(charIdx >= actualStr.length) {
+
+                if (charIdx >= actualStr.length) {
                     clearInterval(typeInterval);
                     appendCursor();
                     isTyping = false;
