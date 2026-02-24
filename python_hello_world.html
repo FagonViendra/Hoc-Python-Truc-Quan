@@ -131,7 +131,8 @@
             display: flex;
             flex-direction: column;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.1);
-            overflow: visible;
+            overflow: hidden;
+            /* Changed from visible to hidden to prevent overlap */
             position: relative;
             /* Flex 1 bị ghi đè bởi Split.js width */
         }
@@ -244,6 +245,73 @@
             background: #19030a;
             box-shadow: inset 0 8px 20px rgba(0, 0, 0, 0.8);
             border-radius: 0 0 10px 10px;
+        }
+
+        /* Help Overlay */
+        .help-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .help-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .help-content {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .help-content h2 {
+            margin-top: 0;
+            color: #f472b6;
+            font-family: 'VT323', monospace;
+            font-size: 2rem;
+        }
+
+        .help-content p,
+        .help-content li {
+            color: #cbd5e1;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .help-content ul {
+            padding-left: 20px;
+        }
+
+        .help-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .help-close:hover {
+            color: #fff;
         }
 
         /* Style chung cho một khối lệnh */
@@ -574,6 +642,15 @@
                     Khu Vực Tư Duy Kéo Thả
                 </div>
                 <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-icon" title="Hướng dẫn"
+                        style="padding: 6px; border-radius: 8px; background: rgba(255,255,255,0.05); cursor: help;">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </button>
                     <button class="btn btn-icon" title="Cài đặt"
                         style="padding: 6px; border-radius: 8px; background: rgba(255,255,255,0.05);">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
@@ -632,14 +709,14 @@
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <!-- Nút mở to -->
-                    <button class="btn btn-icon" title="Toàn màn hình"
-                        onclick="document.documentElement.requestFullscreen();"
+                    <button class="btn btn-icon" title="Toàn màn hình không gian làm việc" onclick="toggleFullScreen()"
                         style="padding: 6px; border-radius: 8px; background: rgba(255,255,255,0.05);">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
-                            <path
-                                d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
-                            </path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <polyline points="9 21 3 21 3 15"></polyline>
+                            <line x1="21" y1="3" x2="14" y2="10"></line>
+                            <line x1="3" y1="21" x2="10" y2="14"></line>
                         </svg>
                     </button>
                     <button class="btn" style="background: rgba(255,255,255,0.1); padding: 5px 10px; font-size: 0.8rem;"
@@ -699,7 +776,50 @@
         </div>
     </div>
 
+    <!-- Help Overlay Modal -->
+    <div id="help-modal" class="help-overlay" onclick="closeHelp(event)">
+        <div class="help-content" onclick="event.stopPropagation()">
+            <button class="help-close" onclick="closeHelp(event)"><svg width="24" height="24" fill="none"
+                    stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg></button>
+            <h2>Hướng Dẫn Sử Dụng</h2>
+            <p>Trạm Dịch Mã Python là công cụ học lập trình bằng cách kéo thả khối trực quan.</p>
+            <ul>
+                <li><strong>Cột Trái (Tư Duy Kéo Thả):</strong> Kéo thả các khối lệnh từ trên thanh công cụ xuống. Bấm
+                    dấu <code>X</code> màu đỏ để xóa khối. Nấu mũi tên để kéo lên xuống thay đổi thứ tự.</li>
+                <li><strong>Mã Nguồn (Góc Trên Phải):</strong> Mỗi khi bạn ghép khối lệnh, mã tương ứng sẽ được sinh ra
+                    ở đây dưới dạng Python, C++ hoặc JavaScript. Bấm "Chỉnh sửa" để gõ Code ngược thành khối.</li>
+                <li><strong>Terminal (Góc Dưới Phải):</strong> Bấm nút <code>COMPILE & RUN</code> màu xanh lá, kết quả
+                    sẽ hiện ở Terminal này hệt như một hacker thực thụ.</li>
+                <li><strong>Kéo Viền:</strong> Đưa chuột vào dải dấu chấm <code>⋮</code> hoặc <code>⋯</code> chia giữa
+                    các màn hình để kéo to/nhỏ tùy ý trải nghiệm.</li>
+            </ul>
+        </div>
+    </div>
+
     <script>
+        function openHelp() {
+            document.getElementById('help-modal').classList.add('active');
+        }
+        function closeHelp(e) {
+            document.getElementById('help-modal').classList.remove('active');
+        }
+
+        function toggleFullScreen() {
+            const container = document.getElementById('main-container');
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
         // Cấu hình tính năng Kéo Thả bằng SortableJS cho các khối lệnh nhỏ
         const editor = document.getElementById('editor');
         new Sortable(editor, {
