@@ -9,7 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Học Python - Bài 1 & 2: Hello World & Biến Sở</title>
+    <title>Học Lập Trình Trực Quan - Loxi</title>
     <!-- Tải phông chữ hiện đại để giao diện xịn sò hơn -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=VT323&display=swap"
         rel="stylesheet">
@@ -71,27 +71,32 @@
 
         .panel {
             flex: 1;
-            background: var(--panel-bg);
+            background: #2d0e1b;
             border-radius: 20px;
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(16px);
+            border-top: 2px solid #5a1e38;
+            border-left: 2px solid #5a1e38;
+            border-right: 2px solid #1a0510;
+            border-bottom: 6px solid #1a0510;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.1);
             overflow: hidden;
             position: relative;
+            transition: transform 0.1s;
         }
 
         .panel-header {
             padding: 16px 24px;
-            background: rgba(0, 0, 0, 0.4);
-            border-bottom: 1px solid var(--border-color);
+            background: #4a152d;
+            border-bottom: 2px solid #1a0510;
             font-weight: 600;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 1.1rem;
             color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            z-index: 10;
         }
 
         /* Thanh công cụ chứa các nút thêm khối lệnh */
@@ -107,53 +112,61 @@
         .btn {
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
+            padding: 10px 18px;
+            border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.1s ease;
             display: flex;
             align-items: center;
             gap: 6px;
             font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            border-bottom: 4px solid rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
 
         .btn-print {
-            background: linear-gradient(135deg, #2563eb, #4f46e5);
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-bottom-color: #1e3a8a;
         }
 
         .btn-var {
-            background: linear-gradient(135deg, #d946ef, #9333ea);
-            box-shadow: 0 4px 15px rgba(217, 70, 239, 0.3);
+            background: linear-gradient(135deg, #d946ef, #a21caf);
+            border-bottom-color: #701a75;
         }
 
         .btn-math {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
+            background: linear-gradient(135deg, #f59e0b, #b45309);
+            border-bottom-color: #78350f;
         }
 
         .btn:active {
-            transform: translateY(0);
+            transform: translateY(4px);
+            border-bottom-width: 0px;
+            margin-bottom: 4px;
         }
 
         /* Nút phân tích & chạy code */
         .run-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #10b981, #047857);
+            border-bottom-color: #064e3b;
             padding: 10px 24px;
             font-size: 1rem;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-            border-radius: 10px;
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
         }
 
         .run-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .run-btn:active {
+            transform: translateY(4px);
+            border-bottom-width: 0px;
+            margin-bottom: 4px;
+            box-shadow: 0 2px 5px rgba(16, 185, 129, 0.4);
         }
 
         /* Khu vực thả khối lệnh (Editor) */
@@ -163,28 +176,32 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            background: rgba(0, 0, 0, 0.1);
+            gap: 16px;
+            background: #19030a;
+            box-shadow: inset 0 8px 20px rgba(0, 0, 0, 0.8);
+            border-radius: 0 0 10px 10px;
         }
 
         /* Style chung cho một khối lệnh */
         .code-block {
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-left: 4px solid #38bdf8;
-            border-radius: 10px;
+            background: linear-gradient(to bottom, #2b3956, #1e293b);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: 6px solid #38bdf8;
+            border-right: 1px solid #0f172a;
+            border-bottom: 5px solid #0f172a;
+            border-radius: 12px;
             padding: 12px 16px;
             display: flex;
             align-items: center;
             flex-wrap: wrap;
             /* Cho phép rớt dòng khi bị thu hẹp */
             gap: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
             font-family: 'VT323', monospace;
             font-size: 1.3rem;
             /* Tăng cỡ chữ pixel */
             cursor: grab;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.1s, box-shadow 0.1s, border-bottom-width 0.1s, margin-bottom 0.1s;
             position: relative;
             max-width: 100%;
             box-sizing: border-box;
@@ -192,24 +209,30 @@
 
         .code-block:active {
             cursor: grabbing;
-            transform: scale(0.98);
+            transform: translateY(4px);
+            border-bottom-width: 1px;
+            margin-bottom: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
         }
 
         .code-block.sortable-ghost {
-            opacity: 0.4;
+            opacity: 0.2;
         }
 
         /* Màu viền trái riêng cho từng loại block */
         .block-print {
             border-left-color: #38bdf8;
+            background: linear-gradient(to bottom, #1e3a8a, #0f172a);
         }
 
         .block-var {
             border-left-color: #c084fc;
+            background: linear-gradient(to bottom, #4c1d95, #2e1065);
         }
 
-        .block-math {
-            border-left-color: #fbbf24;
+        .block-error {
+            border-left-color: #ef4444 !important;
+            background: linear-gradient(to bottom, #7f1d1d, #450a0a) !important;
         }
 
         /* Biểu tượng kéo thả */
@@ -265,23 +288,27 @@
         }
 
         .delete-btn {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            color: #ef4444;
+            background: linear-gradient(to bottom, #ef4444, #b91c1c);
+            border: none;
+            border-top: 1px solid #fca5a5;
+            border-bottom: 3px solid #7f1d1d;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            color: #fff;
             cursor: pointer;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-left: auto;
-            transition: all 0.2s;
+            transition: all 0.1s;
         }
 
-        .delete-btn:hover {
-            background: #ef4444;
-            color: white;
+        .delete-btn:active {
+            transform: translateY(3px);
+            border-bottom-width: 0px;
+            margin-bottom: 3px;
         }
 
         /* Terminal (Bảng Trực Quan) */
@@ -292,9 +319,11 @@
             font-size: 1.4rem;
             line-height: 1.6;
             overflow-y: auto;
-            color: #e2e8f0;
+            color: #4ade80;
+            /* Màu text terminal kiểu cũ */
             background: #0f172a;
             position: relative;
+            box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.9), inset 0 0 10px rgba(74, 222, 128, 0.2);
         }
 
         .terminal::before {
@@ -387,12 +416,14 @@
             opacity: 1;
         }
 
-        /* Giao diện code tĩnh được sinh ra (Phía dưới terminal) */
+        /* Màn hình chỉnh sửa code */
         .generated-code {
-            border-top: 1px solid var(--border-color);
             padding: 16px 24px;
-            background: rgba(0, 0, 0, 0.6);
+            background: #110106;
             min-height: 120px;
+            box-shadow: inset 0 8px 20px rgba(0, 0, 0, 0.8);
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
         }
 
         .generated-code h3 {
@@ -431,20 +462,9 @@
 <body>
     <header
         style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
-        <h1 style="display: flex; align-items: center; gap: 12px;">
-            Trạm Dịch Mã Python
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z">
-                </path>
-                <path
-                    d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z">
-                </path>
-                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
-                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
-            </svg>
-        </h1>
-        <p class="subtitle">Kéo thả, Lắp ráp và Xem Code chạy Thực tế ngay lập tức!</p>
+        <p class="subtitle" style="font-family: 'VT323', monospace; font-size: 1.5rem; letter-spacing: 2px;">Trạm Dịch
+            Mã Python 🚀</p>
+        <h1>HỌC LẬP TRÌNH TRỰC QUAN</h1>
     </header>
 
     <div class="container">
