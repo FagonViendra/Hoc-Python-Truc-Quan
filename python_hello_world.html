@@ -816,7 +816,7 @@
         function syncCodeToBlocks() {
             isSyncing = true;
             const codeText = document.getElementById('real-code').value;
-            const lines = codeText.split('\\n');
+            const lines = codeText.split('\n');
             editor.innerHTML = ''; // Clear hiện tại
 
             lines.forEach(line => {
