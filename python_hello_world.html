@@ -75,6 +75,16 @@
             /* Bỏ gap đi vì Split.js sẽ chèn gutter vào giữa */
         }
 
+        .container.maximized {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            background: #1a0510;
+        }
+
         /* CSS cho thanh kẻ kéo to nhỏ (Gutter) của Split.js */
         .gutter {
             background-color: transparent;
@@ -562,8 +572,7 @@
             border-bottom-right-radius: 18px;
             display: flex;
             flex-direction: column;
-            flex: 1;
-            /* Allow taking up space in vertical split */
+            /* Removed flex: 1 to allow Split.js to manage height */
         }
 
         .generated-code h3 {
@@ -764,7 +773,7 @@
 
                 <!-- Khối Terminal -->
                 <div id="output-term" class="terminal" data-lang="PYTHON 3.10.4"
-                    style="border-radius: 0 0 20px 20px; flex: 1; overflow-y: auto;">
+                    style="border-radius: 0 0 20px 20px; overflow-y: auto;">
                     <div class="terminal-line sys-msg" id="term-sys-1"># Khởi động môi trường Python mô phỏng...</div>
                     <div class="terminal-line sys-msg"># Trạng thái: Sẵn sàng nhận lệnh!</div>
                     <!-- Con trỏ nhấp nháy -->
@@ -809,15 +818,12 @@
 
         function toggleFullScreen() {
             const container = document.getElementById('main-container');
-            if (!document.fullscreenElement) {
-                container.requestFullscreen().catch(err => {
-                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
+            container.classList.toggle('maximized');
+
+            // Xử lý báo hiệu thu lại layout nếu resize cửa sổ (Tránh lỗi Split)
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 300);
         }
 
         // Cấu hình tính năng Kéo Thả bằng SortableJS cho các khối lệnh nhỏ
@@ -1375,7 +1381,7 @@
         }
         function appendCursor() {
             removeCursor();
-            const output = document.getElementById('output');
+            const output = document.getElementById('output-term');
             const div = document.createElement('div');
             div.id = 'cursor-line';
             div.className = 'terminal-line';
@@ -1391,7 +1397,7 @@
 
         function addLogTerminal(text, isError = false) {
             removeCursor();
-            const output = document.getElementById('output');
+            const output = document.getElementById('output-term');
             const row = document.createElement('div');
             row.className = `terminal-line ${isError ? 'error-msg' : 'output-msg'}`;
 
@@ -1414,7 +1420,7 @@
             const isError = String(textToType).startsWith('[ERROR]');
 
             removeCursor();
-            const output = document.getElementById('output');
+            const output = document.getElementById('output-term');
             const row = document.createElement('div');
             const isSysMsg = String(textToType).startsWith('[Hệ');
 
@@ -1446,7 +1452,7 @@
         }
 
         function clearTerminal() {
-            const output = document.getElementById('output');
+            const output = document.getElementById('output-term');
             output.innerHTML = '';
             appendCursor();
         }
