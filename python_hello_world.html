@@ -25,13 +25,25 @@
             --text-color: #e2e8f0;
             --accent-color: #3b82f6;
             --border-color: rgba(255, 255, 255, 0.1);
+
+            /* Theme Settings */
+            --theme-bg: #380613;
+            --theme-primary: #f472b6;
+            --theme-panel: #2d0e1b;
+            --theme-border: #5a1e38;
+            --theme-header: #4a152d;
+
+            /* Font Size Settings */
+            --code-font-size: 1.25rem;
+            --term-font-size: 1.4rem;
+            --block-font-size: 1.1rem;
         }
 
         body {
             margin: 0;
             padding: 0;
             font-family: 'Inter', sans-serif;
-            background: #380613;
+            background: var(--theme-bg);
             /* Đỏ đô - Dark Maroon */
             color: var(--text-color);
             height: 100vh;
@@ -51,7 +63,7 @@
             margin: 0;
             font-size: 2.2rem;
             font-weight: 800;
-            color: #f472b6;
+            color: var(--theme-primary);
             font-family: 'VT323', monospace;
             text-shadow: 2px 2px 0px #831843, 4px 4px 0px rgba(0, 0, 0, 0.5);
             letter-spacing: 2px;
@@ -132,10 +144,10 @@
         }
 
         .panel {
-            background: #2d0e1b;
+            background: var(--theme-panel);
             border-radius: 20px;
-            border-top: 2px solid #5a1e38;
-            border-left: 2px solid #5a1e38;
+            border-top: 2px solid var(--theme-border);
+            border-left: 2px solid var(--theme-border);
             border-right: 2px solid #1a0510;
             border-bottom: 6px solid #1a0510;
             display: flex;
@@ -149,7 +161,7 @@
 
         .panel-header {
             padding: 16px 24px;
-            background: #4a152d;
+            background: var(--theme-header);
             border-bottom: 2px solid #1a0510;
             border-top-left-radius: 17px;
             border-top-right-radius: 17px;
@@ -340,13 +352,29 @@
             gap: 10px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
             font-family: 'Inter', sans-serif;
-            font-size: 1.1rem;
+            font-size: var(--block-font-size);
             /* Khôi phục kích thước chữ hiện đại */
             cursor: grab;
             transition: transform 0.1s, box-shadow 0.1s, border-bottom-width 0.1s, margin-bottom 0.1s;
             position: relative;
             max-width: 100%;
             box-sizing: border-box;
+        }
+
+        .settings-select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .settings-select option {
+            background: #1e293b;
         }
 
         .code-block:active {
@@ -458,7 +486,7 @@
             flex: 1;
             padding: 24px;
             font-family: 'VT323', monospace;
-            font-size: 1.4rem;
+            font-size: var(--term-font-size);
             line-height: 1.6;
             overflow-y: auto;
             color: #4ade80;
@@ -604,10 +632,11 @@
             color: #fff;
         }
 
-        .generated-code textarea {
+        .generated-code textarea,
+        #line-numbers {
             color: #a78bfa;
             font-family: 'VT323', monospace !important;
-            font-size: 1.25rem !important;
+            font-size: var(--code-font-size) !important;
         }
 
         ::-webkit-scrollbar {
@@ -660,7 +689,7 @@
                             <line x1="12" y1="17" x2="12.01" y2="17"></line>
                         </svg>
                     </button>
-                    <button class="btn btn-icon" title="Cài đặt" onclick="console.log('Chưa có tính năng cài đặt')"
+                    <button class="btn btn-icon" title="Cài đặt" onclick="openSettings()"
                         style="padding: 6px; border-radius: 8px; background: rgba(255,255,255,0.05);">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -813,12 +842,96 @@
         </div>
     </div>
 
+    <!-- Settings Overlay Modal -->
+    <div id="settings-modal" class="help-overlay" onclick="closeSettings(event)">
+        <div class="help-content" onclick="event.stopPropagation()">
+            <button class="help-close" onclick="closeSettings(event)"><svg width="24" height="24" fill="none"
+                    stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg></button>
+            <h2>Cài Đặt Giao Diện</h2>
+            <div style="margin-top: 20px;">
+                <label style="display:block; margin-bottom: 8px; color: #cbd5e1;">Màu sắc (Theme):</label>
+                <select id="setting-theme" class="settings-select" onchange="applySettings()">
+                    <option value="pink">Mặc định (Hồng Đen)</option>
+                    <option value="blue">Đại Dương (Xanh Biển)</option>
+                    <option value="hacker">Hacker (Xanh Lá)</option>
+                </select>
+            </div>
+            <div style="margin-top: 20px;">
+                <label style="display:block; margin-bottom: 8px; color: #cbd5e1;">Cỡ chữ Code & Terminal:</label>
+                <select id="setting-fontsize" class="settings-select" onchange="applySettings()">
+                    <option value="small">Nhỏ</option>
+                    <option value="medium">Vừa (Mặc định)</option>
+                    <option value="large">Lớn</option>
+                    <option value="xlarge">Rất lớn</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
     <script>
         function openHelp() {
             document.getElementById('help-modal').classList.add('active');
         }
         function closeHelp(e) {
             document.getElementById('help-modal').classList.remove('active');
+        }
+
+        function openSettings() {
+            document.getElementById('settings-modal').classList.add('active');
+        }
+        function closeSettings(e) {
+            document.getElementById('settings-modal').classList.remove('active');
+        }
+
+        const themesSettings = {
+            pink: { bg: '#380613', primary: '#f472b6', panel: '#2d0e1b', border: '#5a1e38', header: '#4a152d' },
+            blue: { bg: '#0f172a', primary: '#38bdf8', panel: '#1e293b', border: '#334155', header: '#1e293b' },
+            hacker: { bg: '#050505', primary: '#10b981', panel: '#111827', border: '#064e3b', header: '#064e3b' }
+        };
+
+        const fontSizesSettings = {
+            small: { code: '1rem', term: '1.2rem', block: '0.95rem' },
+            medium: { code: '1.25rem', term: '1.4rem', block: '1.1rem' },
+            large: { code: '1.5rem', term: '1.6rem', block: '1.25rem' },
+            xlarge: { code: '1.75rem', term: '1.8rem', block: '1.4rem' }
+        };
+
+        function applySettings() {
+            const themeKey = document.getElementById('setting-theme').value;
+            const sizeKey = document.getElementById('setting-fontsize').value;
+
+            const root = document.documentElement;
+            // Apply Theme
+            if (themesSettings[themeKey]) {
+                root.style.setProperty('--theme-bg', themesSettings[themeKey].bg);
+                root.style.setProperty('--theme-primary', themesSettings[themeKey].primary);
+                root.style.setProperty('--theme-panel', themesSettings[themeKey].panel);
+                root.style.setProperty('--theme-border', themesSettings[themeKey].border);
+                root.style.setProperty('--theme-header', themesSettings[themeKey].header);
+            }
+
+            // Apply Font Size
+            if (fontSizesSettings[sizeKey]) {
+                root.style.setProperty('--code-font-size', fontSizesSettings[sizeKey].code);
+                root.style.setProperty('--term-font-size', fontSizesSettings[sizeKey].term);
+                root.style.setProperty('--block-font-size', fontSizesSettings[sizeKey].block);
+            }
+
+            // Save to LocalStorage
+            localStorage.setItem('loxi_theme', themeKey);
+            localStorage.setItem('loxi_fontsize', sizeKey);
+        }
+
+        function loadSettings() {
+            const savedTheme = localStorage.getItem('loxi_theme') || 'pink';
+            const savedSize = localStorage.getItem('loxi_fontsize') || 'medium';
+
+            document.getElementById('setting-theme').value = savedTheme;
+            document.getElementById('setting-fontsize').value = savedSize;
+            applySettings();
         }
 
         function toggleFullScreen() {
@@ -1464,6 +1577,7 @@
 
         // Demo ban đầu
         window.onload = () => {
+            loadSettings(); // Tải cài đặt User
             addBlock('print');
             addBlock('variable');
             addBlock('print');
