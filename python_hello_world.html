@@ -329,7 +329,7 @@
         }
 
         .terminal::before {
-            content: "PYTHON 3.10.4";
+            content: attr(data-lang);
             position: absolute;
             top: 10px;
             right: 20px;
@@ -569,7 +569,7 @@
                 <button class="btn" style="background: rgba(255,255,255,0.1); padding: 5px 10px; font-size: 0.8rem;"
                     onclick="clearTerminal()">Xóa Log</button>
             </div>
-            <div class="terminal" id="output">
+            <div class="terminal" id="output" data-lang="PYTHON 3.10.4">
                 <div class="terminal-line sys-msg" id="term-sys-1"># Khởi động môi trường Python mô phỏng...</div>
                 <div class="terminal-line sys-msg"># Trạng thái: Sẵn sàng nhận lệnh!</div>
                 <!-- Con trỏ nhấp nháy -->
@@ -716,15 +716,15 @@
             if (currentLang === 'python') {
                 termSys1.textContent = "# Khởi động môi trường Python mô phỏng...";
                 termPrompt.textContent = ">>> ";
-                document.styleSheets[0].addRule('.terminal::before', 'content: "PYTHON 3.10.4"');
+                terminalBody.setAttribute('data-lang', 'PYTHON 3.10.4');
             } else if (currentLang === 'cpp') {
                 termSys1.textContent = "// Khởi động môi trường C++ mô phỏng (g++)...";
                 termPrompt.textContent = "$ ./a.out ";
-                document.styleSheets[0].addRule('.terminal::before', 'content: "G++ 11.4.0"');
+                terminalBody.setAttribute('data-lang', 'G++ 11.4.0');
             } else if (currentLang === 'javascript') {
                 termSys1.textContent = "// Khởi động môi trường Node.js mô phỏng...";
                 termPrompt.textContent = "> ";
-                document.styleSheets[0].addRule('.terminal::before', 'content: "NODE.JS v18"');
+                terminalBody.setAttribute('data-lang', 'NODE.JS v18');
             }
 
             // Generate lại code dựa trên cấu trúc blocks hiện có
